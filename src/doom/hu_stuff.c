@@ -92,6 +92,7 @@ static hu_textline_t	w_kills;
 static hu_textline_t	w_items;
 static hu_textline_t	w_scrts;
 static hu_textline_t	w_ltime;
+static hu_textline_t	w_pmom;
 static hu_textline_t	w_coordx;
 static hu_textline_t	w_coordy;
 static hu_textline_t	w_coorda;
@@ -649,6 +650,11 @@ void HU_Start(void)
 		       hu_font,
 		       HU_FONTSTART);
 
+    HUlib_initTextLine(&w_pmom,
+		       HU_TITLEX, HU_MSGY + 6 * 8,
+		       hu_font,
+		       HU_FONTSTART);
+
     HUlib_initTextLine(&w_coordx,
 		       HU_COORDX, HU_MSGY + 1 * 8,
 		       hu_font,
@@ -872,6 +878,11 @@ void HU_Drawer(void)
 	HUlib_drawTextLine(&w_ltime, false);
     }
 
+    if (crispy->leveltime == WIDGETS_ALWAYS)
+    {
+	HUlib_drawTextLine(&w_pmom, false);
+    }
+
     if (crispy->playercoords == WIDGETS_ALWAYS || (automapactive && crispy->playercoords == WIDGETS_AUTOMAP))
     {
 	HUlib_drawTextLine(&w_coordx, false);
@@ -919,6 +930,7 @@ void HU_Erase(void)
     HUlib_eraseTextLine(&w_items);
     HUlib_eraseTextLine(&w_scrts);
     HUlib_eraseTextLine(&w_ltime);
+    HUlib_eraseTextLine(&w_pmom);
     HUlib_eraseTextLine(&w_coordx);
     HUlib_eraseTextLine(&w_coordy);
     HUlib_eraseTextLine(&w_coorda);
@@ -1071,6 +1083,18 @@ void HU_Ticker(void)
 	    HUlib_addCharToTextLine(&w_ltime, *(s++));
     }
 
+    if (crispy->leveltime == WIDGETS_ALWAYS)
+    {
+	const int time = leveltime / TICRATE;
+
+        M_snprintf(str, sizeof(str), "%sX %-5d Y %-5d", crstr[CR_GRAY],
+	    plr->mo->momx, plr->mo->momy);
+	HUlib_clearTextLine(&w_pmom);
+	s = str;
+	while (*s)
+	    HUlib_addCharToTextLine(&w_pmom, *(s++));
+    }
+
     // [crispy] "use" button timer overrides the level time widget
     if (crispy->btusetimer && plr->btuse_tics)
     {
@@ -1084,7 +1108,6 @@ void HU_Ticker(void)
 	s = str;
 	while (*s)
 	    HUlib_addCharToTextLine(&w_ltime, *(s++));
-    }
 
     if (crispy->playercoords == WIDGETS_ALWAYS || (automapactive && crispy->playercoords == WIDGETS_AUTOMAP))
     {
