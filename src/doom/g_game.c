@@ -1748,6 +1748,9 @@ static void G_WriteLevelStat(void)
         *decimal = '\0';
     }
 
+    char perplayerKills[200];
+    unsigned int playercount = 0;
+    unsigned int ppk[MAXPLAYERS] = {0,0,0,0};
     for (i = 0; i < MAXPLAYERS; i++)
     {
         if (playeringame[i])
@@ -1755,12 +1758,21 @@ static void G_WriteLevelStat(void)
             playerKills += players[i].killcount;
             playerItems += players[i].itemcount;
             playerSecrets += players[i].secretcount;
+
+            ppk[playercount] = players[i].killcount;
+            playercount++;
         }
     }
+    if (playercount < 2)
+        memset(perplayerKills, 0, 200);
+    else
+    {
+        sprintf(perplayerKills, " (%d+%d+%d+%d)", ppk[0], ppk[1], ppk[2], ppk[3]);
+    }
 
-    fprintf(fstream, "%s%s - %s (%s)  K: %d/%d  I: %d/%d  S: %d/%d\n",
+    fprintf(fstream, "%s%s - %s (%s)  K: %d/%d%s  I: %d/%d  S: %d/%d\n",
             levelString, (secretexit ? "s" : ""),
-            levelTimeString, totalTimeString, playerKills, totalkills, 
+            levelTimeString, totalTimeString, playerKills, totalkills, perplayerKills,
             playerItems, totalitems, playerSecrets, totalsecret);
 }
  
